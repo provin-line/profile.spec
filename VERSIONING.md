@@ -4,7 +4,8 @@
 - **Conditions for the 0.1 tag**: every entry in `rules/` at `draft` or above /
   each `draft` rule carries at least one conformance vector / lint green /
   provin.oss vendoring the profile context from this repository rather than
-  standing in as its canonical.
+  standing in as its canonical (met 2026-07-16) / every vector either driven by
+  an implementation or carrying a ledgered reason it cannot be.
 - **Conditions for 1.0**: the protocol this profile sits on reaches its own 1.0,
   plus a period of real-world validation and the exhaustion of breaking changes
   within 0.x.

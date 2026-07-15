@@ -3,7 +3,8 @@
 - 現状: **0.1 (draft)**。タグはまだ切っていない（条件は下記）。
 - **0.1 タグの条件**: `rules/` の全 entry が `draft` 以上 / 各 `draft` rule が
   conformance vector を 1 本以上持つ / lint green / provin.oss が profile context を
-  本 repo から vendoring している（実装が canonical の代役を降りている）こと。
+  本 repo から vendoring している（実装が canonical の代役を降りている、2026-07-16 達成）/
+  各 vector が実装で駆動されているか、駆動できない理由が ledger にあること。
 - **1.0 の条件**: 土台のプロトコルが 1.0 に達し、実運用での検証期間を経て、
   0.x 内で breaking を出し尽くしたあと。
 - 互換性の単位は **rule の `id` と `statement` の意味**。ファイル配置は規範の
