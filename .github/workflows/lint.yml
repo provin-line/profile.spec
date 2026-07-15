@@ -1,0 +1,45 @@
+name: lint
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  # The spec's own SoT discipline — RFC 2119 keyword placement, rule id
+  # uniqueness/format, uses/vectors reference resolution, status/class enums,
+  # and the rule<->vector bidirectional reference check.
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: install deps
+        run: pip install pyyaml
+      - name: spec lint
+        run: python tools/lint.py
+
+  # The profile context rides the signing scope as bytes, so any divergence
+  # from an implementation's vendored copy partitions hashes. This proves the
+  # sha256 this repo records still describes the file it ships; the
+  # implementation pins the same value against its embedded copy, so the two
+  # tests close the loop without either repo having to trust the other.
+  context-pin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: the recorded sha256 matches the shipped document
+        run: |
+          set -euo pipefail
+          recorded=$(grep -oE '[0-9a-f]{64}' contexts/README.md | head -1)
+          actual=$(sha256sum contexts/v1.jsonld | cut -d' ' -f1)
+          if [ "$recorded" != "$actual" ]; then
+            echo "contexts/README.md records $recorded but contexts/v1.jsonld hashes to $actual" >&2
+            exit 1
+          fi
+          echo "context pin OK: $actual"
