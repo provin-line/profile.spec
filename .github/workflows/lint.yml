@@ -43,3 +43,40 @@ jobs:
             exit 1
           fi
           echo "context pin OK: $actual"
+
+  # Advisory (non-blocking): does this PR's vector set still run against the
+  # current provin.oss harness? Sync the PR's vectors into a fresh oss checkout
+  # and run its coverage-guarded profile harness. A red here means the oss side
+  # has driver or ledger work waiting for a vector added or changed here — an
+  # early signal, NOT a merge blocker.
+  #
+  # The split is deliberate. Vectors are implementation-independent and live
+  # here; DRIVERS bind a vector to one implementation's API and live with that
+  # implementation. Putting drivers here would make this spec depend on
+  # provin.oss — inverting the direction the whole repository exists to fix,
+  # and leaving a second implementation nothing it could reuse. So this job
+  # only asks provin.oss a question, and does not gate on the answer: the
+  # spec's evolution is not blocked on any implementation's catch-up.
+  oss-harness-crosscheck:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: checkout the profile spec (this PR)
+        uses: actions/checkout@v4
+        with:
+          path: profile.spec
+      - name: checkout provin.oss (default branch)
+        uses: actions/checkout@v4
+        with:
+          repository: provin-line/oss
+          path: oss
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: oss/go.mod
+          cache: true
+      - name: sync this PR's vectors into the oss harness
+        working-directory: oss
+        run: scripts/sync-profile-vectors.sh ../profile.spec
+      - name: run the coverage-guarded profile harness
+        working-directory: oss
+        run: go test ./conformance/ -run TestProvinProfileAllVectors -v
