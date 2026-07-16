@@ -18,8 +18,9 @@
   vector 13 本の内訳: **駆動 3**（grammar/grounding/topology）、
   **ledgered skip 9**（closure 系 7 = issuer/consumer を縛る規範で library の
   計算対象外、sink-receipt 2 = cmd/standalone の発行者義務）、
-  **gap 1 → 解消予定**（claim-003 = registry 閉性の発行時強制。
-  2026-07-16 ユーザー裁定で実装決定）。
+  **claim-003 は駆動済み**（registry 閉性の発行時強制、2026-07-16 裁定 →
+  同日 provin.oss `vc.New` に実装。同一 fixture で「発行は拒否 / 受信は
+  open-world で受理」の両方向を pin）。
 
 ## 0.1 タグ条件の充足状況
 
@@ -27,8 +28,11 @@
 - [x] 各 draft rule に vector ≥ 1（lint の双方向参照で機械検証）
 - [x] lint green
 - [x] provin.oss が context を本 repo から vendoring（2026-07-16）
-- [ ] 各 vector が「駆動」または「駆動できない理由の ledger」を持つ
-      — claim-003 の駆動化で充足する
+- [x] 各 vector が「駆動」または「駆動できない理由の ledger」を持つ
+      （claim-003 駆動化で充足、2026-07-16）
+
+**→ 0.1 タグ条件はすべて充足。** タグを切るかは public 化の判断と併せて
+maintainer が決める（repo は現状 private）。
 
 ## 未着手（dplaax 同等構成との差分）
 
