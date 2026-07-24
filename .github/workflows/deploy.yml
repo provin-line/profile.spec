@@ -1,0 +1,102 @@
+# Deploys the provin.dev wire surface to S3 + CloudFront.
+#
+# provin.dev serves one machine-readable wire identifier: the JSON-LD context at
+# /vc/v1. (provin's JSON Schemas are served from dplaax.dev, not here.) GitHub
+# Pages would serve the extensionless /vc/v1 as application/octet-stream with no
+# way to override the header; S3 object metadata serves it as
+# application/ld+json. See infra/deploy.md.
+#
+# The served tree is assembled from this repo: site/ holds the apex root + 404
+# (redirect to www.provin.dev); the wire identifier is copied byte-for-byte from
+# contexts/v1.jsonld -> /vc/v1.
+#
+# Disabled until the AWS OIDC role, bucket, and distribution exist. To activate,
+# change `if: false` and populate repo secrets:
+#   - AWS_ROLE_TO_ASSUME       (S3 + CloudFront perms, scoped to this
+#                               bucket/distribution only)
+#   - AWS_REGION
+#   - S3_BUCKET                (wire.provin.dev)
+#   - CLOUDFRONT_DISTRIBUTION_ID
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: false # disabled — see infra/deploy.md before enabling
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble the served tree
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site/vc
+          cp site/index.html _site/index.html
+          cp site/404.html   _site/404.html
+          # extensionless identifier object; Content-Type set explicitly below.
+          cp contexts/v1.jsonld _site/vc/v1
+
+      - name: Guard byte-exact context (must match the recorded sha256)
+        run: |
+          set -euo pipefail
+          # The same pin the lint workflow's context-pin job enforces.
+          expected=$(grep -oE '[0-9a-f]{64}' contexts/README.md | head -1)
+          actual=$(sha256sum _site/vc/v1 | cut -d' ' -f1)
+          if [ "$actual" != "$expected" ]; then
+            echo "::error::served /vc/v1 sha256 $actual != recorded $expected"
+            exit 1
+          fi
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Sync to S3
+        run: |
+          set -euo pipefail
+          # Defense-in-depth for the highest-consequence failure: this step runs
+          # --delete, so refuse any bucket that is not a dedicated wire bucket. A
+          # secret misconfigured to an LP bucket (www.*) would otherwise erase the
+          # landing page — the exact catastrophe this migration exists to prevent.
+          case "$S3_BUCKET" in
+            wire.*) ;;
+            *) echo "::error::refusing to sync --delete a non-wire bucket: $S3_BUCKET"; exit 1 ;;
+          esac
+          # The extensionless identifier object is EXCLUDED from the sync: sync
+          # would upload it as application/octet-stream and only a later step
+          # would repair the type — an interruption (or a CloudFront cache miss
+          # in that window) could serve or pin the wrong type. It is uploaded
+          # exactly once, below, with the right type. --exclude also applies to
+          # the delete scan, so --delete leaves the excluded key alone.
+          aws s3 sync _site/ "s3://${S3_BUCKET}/" --delete \
+            --exclude "vc/v1"
+
+      - name: Upload the extensionless context object
+        run: |
+          set -euo pipefail
+          # Sole upload path for this key (excluded from the sync above): a
+          # single write carrying the correct media type, so the origin never
+          # holds it as application/octet-stream, even transiently.
+          aws s3 cp _site/vc/v1 "s3://${S3_BUCKET}/vc/v1" \
+            --content-type application/ld+json
+
+      - name: Invalidate CloudFront
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
