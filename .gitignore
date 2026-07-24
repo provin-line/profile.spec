@@ -1,0 +1,2 @@
+# scan-tool output (pre-publication gitleaks pass) — never commit
+.gitleaks-report.json
