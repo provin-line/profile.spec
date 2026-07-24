@@ -31,11 +31,12 @@
 - [x] 各 vector が「駆動」または「駆動できない理由の ledger」を持つ
       （claim-003 駆動化で充足、2026-07-16）
 
-**→ 0.1 タグ条件はすべて充足。** タグを切るかは public 化の判断と併せて
-maintainer が決める（repo は現状 private）。
+**→ 0.1 タグ条件はすべて充足。** タグを切るかは maintainer が決める
+（2026-07-25: public 化を決定 — フリップ作業と同時に扱う）。
 
 ## 未着手（dplaax 同等構成との差分）
 
-- `concept.md` / `GLOSSARY.md` / `CONTRIBUTING.md`（+ ja）— profile 単独の
-  concept が要るか（README §What the registry says で足りている可能性）は
-  public 化の判断と併せて決める。repo は現状 private。
+- `CONTRIBUTING.md` は org 共通の `provin-line/.github`（community health
+  files フォールバック）で提供する方針に決定（2026-07-25）。
+- `concept.md` / `GLOSSARY.md`（+ ja）— profile 単独の concept が要るか
+  （README §What the registry says で足りている可能性）は引き続き未決。
