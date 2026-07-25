@@ -12,13 +12,14 @@ here.) This is a different surface from the landing page at `www.provin.dev`
 `application/octet-stream` with no way to override the header. S3 object
 metadata serves it as `application/ld+json`.
 
-## Current state this replaces
+## Prior state this replaced (migrated 2026-07-24)
 
-Today `provin.dev` (apex) is aliased to the **same** CloudFront distribution and
-S3 bucket (`www.provin.dev`) as the landing page — and that bucket is deployed
-with `aws s3 sync ./dist --delete`. Placing `/vc/v1` in that shared bucket would
-make the next LP deploy delete it. This surface fixes that by giving the wire
-its **own** bucket + distribution, physically separated from the LP.
+Before the migration, `provin.dev` (apex) was aliased to the **same**
+CloudFront distribution and S3 bucket (`www.provin.dev`) as the landing page —
+and that bucket is deployed with `aws s3 sync ./dist --delete`, so placing
+`/vc/v1` in the shared bucket would have let the next LP deploy delete it.
+This surface fixed that by giving the wire its **own** bucket + distribution,
+physically separated from the LP (the topology below is the live state).
 
 ## Topology
 
