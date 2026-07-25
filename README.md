@@ -1,7 +1,7 @@
 # provin wire profile (draft)
 
 The normative spec for the **`provin` wire profile** of the
-[dPLaaX protocol](https://github.com/dplaax/spec_draft).
+[dPLaaX protocol](https://github.com/dplaax/spec).
 
 dPLaaX records, at every boundary data crosses, who received what, did what, and
 passed on what — so the chain can be verified by a third party. It pins the
