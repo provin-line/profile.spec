@@ -1,7 +1,7 @@
 # provin wire profile (draft)
 
 **`provin` wire profile** の normative spec。
-[dPLaaX プロトコル](https://github.com/dplaax/spec_draft) の profile である。
+[dPLaaX プロトコル](https://github.com/dplaax/spec) の profile である。
 
 dPLaaX は、データが境界を越えるたびに「誰が何を受け取り、何を行い、何を渡したか」を
 記録し、その連なりを第三者が確かめられるようにする。credential の wire、
