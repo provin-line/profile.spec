@@ -107,11 +107,38 @@ aws cloudfront create-invalidation --distribution-id <DIST_ID> --paths "/*"
 
 ## CI deployment
 
-`.github/workflows/deploy.yml` ships disabled (`if: false`). To enable:
+`.github/workflows/deploy.yml` ships disabled (`if: false`). The bucket and the
+distribution already exist and serve — publishing happens through the manual
+fallback above. What is missing is only the trust path from the workflow to
+them. To enable:
 
 1. Create an AWS IAM role trusted by GitHub OIDC
    (`token.actions.githubusercontent.com`) with S3 sync + CloudFront
    `create-invalidation` permissions on **this** bucket / distribution only.
+
+   Scope the **trust policy** as tightly as the permissions, on `sub`:
+
+   ```json
+   "StringEquals": {
+     "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+     "token.actions.githubusercontent.com:sub":
+       "repo:provin-line/profile.spec:ref:refs/heads/main"
+   }
+   ```
+
+   Two things this pins that a looser policy does not. `repo:provin-line/*`
+   would let **any** repository in the organisation assume the role and rewrite
+   a frozen wire URI. And without the `ref:` component, a pull request from a
+   fork — or any branch — could assume it; the workflow's own `branches: [main]`
+   trigger is not an authorization boundary, it is a scheduling one.
+
 2. Add repo secrets: `AWS_ROLE_TO_ASSUME`, `AWS_REGION`, `S3_BUCKET`
-   (`wire.provin.dev`), `CLOUDFRONT_DISTRIBUTION_ID`.
+   (`wire.provin.dev`), `CLOUDFRONT_DISTRIBUTION_ID`. None are set today.
 3. Change `if: false` to `if: github.ref == 'refs/heads/main'`.
+
+> **Historical note.** Until 2026-07-27 this repository's default branch was
+> `develop` and no `main` existed, while `deploy.yml` triggered on
+> `branches: [main]` and the steps above named `main` throughout. Enabling it
+> then would have produced a workflow that never fired — worse than a disabled
+> one, because it looks enabled. The rename to `main` (all four public
+> repositories now share the trunk name) removed that trap.
