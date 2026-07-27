@@ -1,6 +1,9 @@
 # Versioning
 
-- Current state: **0.1 (draft)**. No tag is cut yet — see the conditions below.
+- Current state: **0.1 (draft)**, tagged `v0.1.0` on 2026-07-27. Every rule
+  stays at `draft`; the tag fixes the compatibility unit below at a citable
+  point, it does not promote any rule's status. The conditions that gated it
+  are kept for the record:
 - **Conditions for the 0.1 tag**: every entry in `rules/` at `draft` or above /
   each `draft` rule carries at least one conformance vector / lint green /
   provin.oss vendoring the profile context from this repository rather than
