@@ -1,6 +1,8 @@
 # Versioning
 
-- 現状: **0.1 (draft)**。タグはまだ切っていない（条件は下記）。
+- 現状: **0.1 (draft)**、2026-07-27 に `v0.1.0` をタグ。全 rule は `draft` の
+  まま — タグが固定するのは下記の互換性の単位であって、rule の status を
+  昇格させるものではない。ゲートとなった条件は記録として残す:
 - **0.1 タグの条件**: `rules/` の全 entry が `draft` 以上 / 各 `draft` rule が
   conformance vector を 1 本以上持つ / lint green / provin.oss が profile context を
   本 repo から vendoring している（実装が canonical の代役を降りている、2026-07-16 達成）/
