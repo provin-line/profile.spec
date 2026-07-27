@@ -10,13 +10,26 @@
 # (redirect to www.provin.dev); the wire identifier is copied byte-for-byte from
 # contexts/v1.jsonld -> /vc/v1.
 #
-# Disabled until the AWS OIDC role, bucket, and distribution exist. To activate,
-# change `if: false` and populate repo secrets:
-#   - AWS_ROLE_TO_ASSUME       (S3 + CloudFront perms, scoped to this
-#                               bucket/distribution only)
-#   - AWS_REGION
-#   - S3_BUCKET                (wire.provin.dev)
-#   - CLOUDFRONT_DISTRIBUTION_ID
+# Disabled — but no longer for the reason this comment used to give. The bucket
+# and the distribution DO exist and have been serving since 2026-07-24
+# (CloudFront E1HJE4N7OUAJU7 ← OAC ← s3://wire.provin.dev; provin.dev/vc/v1
+# answers 200 application/ld+json today). Publishing has been happening through
+# infra/deploy.md's manual, sha-guarded fallback.
+#
+# What is actually missing is the trust path from THIS workflow to that bucket:
+#
+#   1. a GitHub OIDC identity provider in the AWS account, and an IAM role whose
+#      trust policy is scoped to this repository (sub: repo:provin-line/
+#      profile.spec:ref:refs/heads/main — a role trusting the whole org would let
+#      any repo here write the wire surface);
+#   2. four repo secrets: AWS_ROLE_TO_ASSUME, AWS_REGION, S3_BUCKET
+#      (wire.provin.dev), CLOUDFRONT_DISTRIBUTION_ID;
+#   3. `if: false` removed from the job below.
+#
+# Until 2026-07-27 there was a fourth blocker that would have made enabling this
+# silently useless: the trigger below is `branches: [main]` and this repository
+# had no main — its default branch was develop. Renaming develop → main fixed
+# that, so the trigger is now real.
 name: deploy
 
 on:
