@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=../tools/rule.schema.json
+# provin profile — evidence-qualified AI Agent data access.
+# File split is non-normative. Entry identity is carried by id (→ README.md).
+rules:
+  - id: agent.delivery.exact-occurrence
+    status: draft
+    class: core
+    statement: >-
+      A successful production Agent delivery MUST bind the delivered payload
+      digest, head output hash, and locally appraised EvidenceViewID to the same
+      occurrence; any mismatch MUST be rejected before the Agent writer.
+    uses: []
+    schemas: [agent-delivery.json]
+    vectors: [agent-delivery-001, agent-delivery-002, agent-delivery-003]
+    notes: >-
+      This profile consumes dPLaaX evidence.manifest.identity and does not
+      redefine evidence identity. The record is a successful delivery artifact,
+      not a claim that the payload is factually true.
+
+  - id: agent.delivery.fail-closed
+    status: draft
+    class: core
+    statement: >-
+      A production Agent delivery MUST invoke its writer only for a local ACCEPT;
+      DENY, QUARANTINE, missing appraisal, appraisal error, or unsupported
+      required coverage MUST produce no delivery record.
+    uses: [agent.delivery.exact-occurrence]
+    schemas: [agent-delivery.json]
+    vectors: [agent-delivery-004]
+    notes: >-
+      Quarantine is a no-write outcome in the core profile. A later optional
+      effect-gated profile may define storage, release, and dwell operations.
+
+  - id: federation.appraisal.local
+    status: draft
+    class: core
+    statement: >-
+      A receiving organization MUST derive Agent delivery under its own
+      versioned decision profile; a remote decision MAY be retained as evidence
+      but MUST NOT substitute for the receiver's local appraisal.
+    uses: [agent.delivery.fail-closed]
+    schemas: [agent-delivery.json]
+    vectors: [agent-delivery-005]
+    notes: >-
+      Evidence can cross a custody boundary without making the sender's policy
+      authoritative at the receiver. This is the policy half of structural data
+      sovereignty.
+
+  - id: agent.paths.closed
+    status: draft
+    class: core
+    statement: >-
+      A deployment claiming mediated Agent access MUST enumerate every configured
+      Agent-readable data path; every enabled path MUST name the same appraisal
+      boundary, and every other path MUST be disabled.
+    uses: [agent.delivery.fail-closed]
+    schemas: [agent-access-deployment.json]
+    vectors: [agent-paths-001, agent-paths-002]
+    notes: >-
+      The claim is deployment-relative. It says nothing about an undeclared
+      database, administrator channel, or service outside the evaluated
+      deployment boundary.
