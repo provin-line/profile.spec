@@ -20,9 +20,11 @@ jobs:
         with:
           python-version: "3.12"
       - name: install deps
-        run: pip install pyyaml
+        run: pip install pyyaml jsonschema
       - name: spec lint
         run: python tools/lint.py
+      - name: Agent access vectors
+        run: python tools/verify_agent_access_vectors.py
 
   # The profile context rides the signing scope as bytes, so any divergence
   # from an implementation's vendored copy partitions hashes. This proves the

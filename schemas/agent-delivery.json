@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://provin.dev/schemas/agent-delivery.json",
+  "title": "Successful evidence-qualified Agent delivery",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["boundaryId", "payloadDigest", "headOutputHash", "evidenceViewId", "appraisal"],
+  "properties": {
+    "boundaryId": { "$ref": "#/$defs/versionedId" },
+    "payloadDigest": { "$ref": "#/$defs/contentAddress" },
+    "headOutputHash": { "$ref": "#/$defs/contentAddress" },
+    "evidenceViewId": { "$ref": "#/$defs/contentAddress" },
+    "appraisal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authority", "evidenceViewId", "decision", "decisionProfileId"],
+      "properties": {
+        "authority": { "const": "LOCAL" },
+        "evidenceViewId": { "$ref": "#/$defs/contentAddress" },
+        "decision": { "const": "ACCEPT" },
+        "decisionProfileId": { "$ref": "#/$defs/versionedId" }
+      }
+    }
+  },
+  "$defs": {
+    "contentAddress": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "versionedId": {
+      "type": "string",
+      "pattern": "^.+@[0-9]+$"
+    }
+  }
+}
